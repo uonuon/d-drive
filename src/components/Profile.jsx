@@ -5,6 +5,8 @@ import {
 import DragDropFile from "./dragDropFile.jsx";
 import {FileModal} from '../radiks/fileModel.tsx';
 import MyFiles from "./MyFiles.jsx";
+import {ClipLoader} from "react-spinners";
+import {notify} from "react-notify-toast";
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 const getBase64FromFile = (file) => {
@@ -31,7 +33,10 @@ export default class Profile extends Component {
                 },
             },
             currentTab: '0',
-            file: []
+            file: [],
+            uploading: false,
+            uploaded: false,
+            failed: false
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -43,12 +48,31 @@ export default class Profile extends Component {
     };
 
     async uploadNewFile(file) {
+        this.setState({
+            uploading: true,
+            uploaded: false,
+            failed: false
+        });
         const fileData = await getBase64FromFile(file);
         const newFile = new FileModal({
             fileData,
             fileName: file.name
         });
-        await newFile.save();
+        newFile.save().then(() => {
+            this.setState({
+                uploading: false,
+                uploaded: true,
+                failed: false
+            });
+            notify.show('File has been uploaded successfully!', 'success');
+        }).catch(() => {
+            this.setState({
+                uploading: false,
+                uploaded: false,
+                failed: true
+            });
+            notify.show('Something went wrong!', 'error');
+        });
     }
 
     handleChange(e) {
@@ -67,7 +91,7 @@ export default class Profile extends Component {
 
     render() {
         const {handleSignOut, userSession} = this.props;
-        const {person, currentTab} = this.state;
+        const {person, currentTab, uploading} = this.state;
         return (
             !userSession.isSignInPending() ?
                 <div className="panel-welcome" id="section-2">
@@ -94,8 +118,17 @@ export default class Profile extends Component {
                         {currentTab === '0' ?
                             <div className='upload-part'>
                                 <DragDropFile className='dragDrop' handleFile={this.handleDrop}/>
-                                <span>Drag and Drop or <span>Browse</span> to upload</span>
+                                {uploading ? <div>
+                                    <ClipLoader
+                                        sizeUnit={"px"}
+                                        size={20}
+                                        color={'white'}
+                                        loading={true}
+                                    />
+                                    <p>Uploading</p>
+                                </div> : <span>Drag and Drop or <span>Browse</span> to upload</span>}
                                 <input
+                                    disabled={uploading}
                                     type="file"
                                     className='upload-btn'
                                     onChange={this.handleChange}

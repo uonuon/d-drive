@@ -1,6 +1,7 @@
-import React, {Component, Link} from 'react';
+import React, {Component} from 'react';
 import Profile from './Profile.jsx';
 import Signin from './Signin.jsx';
+import Notifications from 'react-notify-toast';
 import {
     UserSession,
     AppConfig
@@ -32,6 +33,9 @@ export default class App extends Component {
     render() {
         return (
             <div className="site-wrapper">
+                <div style={{ fontSize: '2rem' }}>
+                    <Notifications options={{ zIndex: 2000, wrapperId: 'notificationsWrapper' }} />
+                </div>
                 <div className="site-wrapper-inner">
                     {!userSession.isUserSignedIn() ?
                         <Signin userSession={userSession} handleSignIn={this.handleSignIn}/>

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {FileModal} from '../radiks/fileModel.jsx';
+import {FileModal} from '../radiks/fileModel.tsx';
 
 export default class MyFiles extends Component {
     constructor(props) {
@@ -12,8 +12,11 @@ export default class MyFiles extends Component {
 
     render() {
         return (
-                <div className="my-files">
-                </div>
+            <div className="my-files">
+                {
+                    this.state.files.map(file => <a key={file.id} href={file.fileData} download={file.fileName}>{file.fileName}</a>)
+                }
+            </div>
         );
     }
 

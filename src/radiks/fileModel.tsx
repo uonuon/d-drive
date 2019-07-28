@@ -2,14 +2,10 @@ import {Model} from 'radiks';
 
 
 export class FileModal extends Model {
-  constructor() {
-    FileModal.className = 'FileModal';
-    FileModal.schema = {
+    static className = 'FileModal';
+    static schema = {
       fileData: String,
       fileName: String,
     };
-    super();
-  }
-
 }
 

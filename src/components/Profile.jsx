@@ -3,7 +3,7 @@ import {
     Person,
 } from 'blockstack';
 import DragDropFile from "./dragDropFile.jsx";
-import {FileModal} from '../radiks/fileModel.jsx';
+import {FileModal} from '../radiks/fileModel.tsx';
 import MyFiles from "./MyFiles.jsx";
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';

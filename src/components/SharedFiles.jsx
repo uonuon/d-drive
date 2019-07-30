@@ -44,6 +44,7 @@ export default class SharedFiles extends Component {
         });
         try {
             const groups = await UserGroup.myGroups();
+            console.log(groups);
             const processFiles = () =>
                 Promise.all(
                     groups.map(group => {

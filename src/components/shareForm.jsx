@@ -45,8 +45,10 @@ class ShareForm extends Component {
         await userInvited.update(userInvitationObj);
         await userInvited.save();
         const file = await FileModal.findById(this.props.selectedFileID);
-        file.update({userGroupId: group._id});
-        await file.save();
+        const newFile = new FileModal();
+        newFile.update({userGroupId: group._id, fileName: file.attrs.fileName, fileData: file.attrs.fileData});
+        // file.update({userGroupId: group._id});
+        await newFile.save();
         this.setState({
             loading: false,
             loaded: true,

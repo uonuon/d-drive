@@ -32,7 +32,7 @@ export default class MyFiles extends Component {
                 {
                     loaded ? files.map(file => {
                             return (
-                                <div key={file.id}>
+                                <div className={'myFile'} key={file.id}>
                                     <a href={file.fileData} download={file.fileName}>{file.fileName}</a>
                                     <button className="btn btn-primary btn-lg"
                                             onClick={this.toggle.bind(null, file.id)}>
@@ -60,7 +60,7 @@ export default class MyFiles extends Component {
         });
         try {
             const files = await FileModal.fetchOwnList();
-
+            console.log(files);
             this.setState({
                 loading: false,
                 loaded: true,

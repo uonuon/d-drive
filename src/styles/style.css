@@ -279,3 +279,13 @@ input, textarea {
     }
 
 }
+
+.myFile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 60%;
+    border-bottom: 1px solid #000;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}

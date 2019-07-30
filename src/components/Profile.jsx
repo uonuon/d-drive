@@ -48,7 +48,7 @@ export default class Profile extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
         this.acceptInvitation = this.acceptInvitation.bind(this);
-        this.acceptAllInvitation = this.acceptAllInvitation.bind(this);
+        // this.acceptAllInvitation = this.acceptAllInvitation.bind(this);
     }
 
     onTabClicked(index) {
@@ -110,19 +110,19 @@ export default class Profile extends Component {
         notify.show('Invitation has been accepted successfully!','success');
     };
 
-    async acceptAllInvitation() {
-        const processAllInvitations = () =>
-            Promise.all(
-                this.state.invitations.map(inv => {
-                    return new Promise(async resolve => {
-                        resolve(this.acceptInvitation(inv.id, inv._id));
-                    });
-                })
-            );
-        await processAllInvitations();
-        this.setState({invitations: []});
-        notify.show('Invitations have been accepted successfully!','success');
-    };
+    // async acceptAllInvitation() {
+    //     const processAllInvitations = () =>
+    //         Promise.all(
+    //             this.state.invitations.map(inv => {
+    //                 return new Promise(async resolve => {
+    //                     resolve(this.acceptInvitation(inv.id, inv._id));
+    //                 });
+    //             })
+    //         );
+    //     await processAllInvitations();
+    //     this.setState({invitations: []});
+    //     notify.show('Invitations have been accepted successfully!','success');
+    // };
 
     render() {
         const {handleSignOut, userSession} = this.props;
@@ -136,13 +136,10 @@ export default class Profile extends Component {
                                 className={`notifications ${invitations.length > 0 && 'pulseBtn'}`}/>
                         </DropdownToggle>
                         <DropdownMenu className='notifyDD'>
-                            <DropdownItem className='notifyItem'>
-                                <button onClick={this.acceptAllInvitation} className='accept'>Accept all</button>
-                            </DropdownItem>
                             {invitations.map(inv => {
                                 return (
                                     <DropdownItem key={inv.id} className='notifyItem'>
-                                        You have got a new invitation <button
+                                        Someone shared a file with you, would you like to accept? <button
                                         onClick={this.acceptInvitation.bind(null, inv.id, inv._id)}
                                         className='accept'>Accept</button>
                                     </DropdownItem>);
@@ -153,7 +150,7 @@ export default class Profile extends Component {
                         <img src={person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage}
                              className="img-rounded avatar" id="avatar-image"/>
                     </div>
-                    <h1>Hello, <span id="heading-name">{person.name() ? person.name() : 'Nameless Person'}</span>!</h1>
+                    <h1>Hello, <span id="heading-name">{person.name() ? person.name() : 'Anonymous'}</span>!</h1>
                     <div className='tab-wrapper'>
                         <div>
                             <button

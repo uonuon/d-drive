@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {FileModal} from '../radiks/fileModel.tsx';
 import {notify} from "react-notify-toast";
 import {ClipLoader} from "react-spinners";
+import ShareForm from "./shareForm.jsx";
+
 export default class MyFiles extends Component {
     constructor(props) {
         super(props);
@@ -11,21 +13,40 @@ export default class MyFiles extends Component {
             loading: false,
             loaded: false,
             failed: false,
+            isOpen: false,
+            selectedFileID: undefined,
         };
+
+        this.toggle = this.toggle.bind(this);
     }
 
+    toggle(selectedFileID) {
+        this.setState(prevValue => ({isOpen: !prevValue.isOpen, selectedFileID}))
+    };
+
     render() {
-        const{loaded,failed,files} =this.state;
+        const {loaded, failed, files, isOpen, selectedFileID} = this.state;
         return (
             <div className="my-files">
+                {isOpen && <ShareForm toggle={this.toggle} selectedFileID={selectedFileID} isOpen={isOpen}/>}
                 {
-                    loaded ? files.map(file => <a key={file.id} href={file.fileData} download={file.fileName}>{file.fileName}</a>)
-                    : failed ? <p>Failed to fetch files!</p> : <ClipLoader
-                    sizeUnit={"px"}
-                    size={20}
-                    color={'white'}
-                    loading={true}
-                />
+                    loaded ? files.map(file => {
+                            return (
+                                <div key={file.id}>
+                                    <a href={file.fileData} download={file.fileName}>{file.fileName}</a>
+                                    <button className="btn btn-primary btn-lg"
+                                            onClick={this.toggle.bind(null, file.id)}>
+                                        Share
+                                    </button>
+                                </div>
+                            )
+                        })
+                        : failed ? <p>Failed to fetch files!</p> : <ClipLoader
+                            sizeUnit={"px"}
+                            size={20}
+                            color={'white'}
+                            loading={true}
+                        />
                 }
             </div>
         );
@@ -52,15 +73,14 @@ export default class MyFiles extends Component {
             this.setState({
                 files: mappedFiles
             });
-        }
-        catch(e){
+        } catch (e) {
             this.setState({
                 loading: false,
                 loaded: false,
                 failed: true,
             });
-            notify.show('Something went wrong!','error');
+            notify.show('Something went wrong!', 'error');
         }
-        
+
     }
 }

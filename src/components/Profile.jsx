@@ -7,6 +7,11 @@ import {FileModal} from '../radiks/fileModel.tsx';
 import MyFiles from "./MyFiles.jsx";
 import {ClipLoader} from "react-spinners";
 import {notify} from "react-notify-toast";
+import {InvitationScheme} from "../radiks/invitationsModel.tsx";
+import {DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown} from "reactstrap";
+import {GroupInvitation} from "radiks";
+import Notifications from "@material-ui/icons/Notifications";
+import SharedFiles from "./SharedFiles.jsx";
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 const getBase64FromFile = (file) => {
@@ -36,11 +41,14 @@ export default class Profile extends Component {
             file: [],
             uploading: false,
             uploaded: false,
-            failed: false
+            failed: false,
+            invitations: []
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
+        this.acceptInvitation = this.acceptInvitation.bind(this);
+        this.acceptAllInvitation = this.acceptAllInvitation.bind(this);
     }
 
     onTabClicked(index) {
@@ -89,12 +97,58 @@ export default class Profile extends Component {
         this.uploadNewFile(file);
     };
 
+    async acceptInvitation(id, invitationSchemeId) {
+        const invitation = await GroupInvitation.findById(id);
+        await invitation.activate();
+        const invitationScheme = await InvitationScheme.findById(invitationSchemeId);
+        invitationScheme.update({
+            isPending: false
+        });
+        await invitationScheme.save();
+        const updatedInvitations = this.state.invitations.filter(i => i._id !== invitationSchemeId);
+        this.setState({invitations: updatedInvitations});
+        notify.show('Invitation has been accepted successfully!','success');
+    };
+
+    async acceptAllInvitation() {
+        const processAllInvitations = () =>
+            Promise.all(
+                this.state.invitations.map(inv => {
+                    return new Promise(async resolve => {
+                        resolve(this.acceptInvitation(inv.id, inv._id));
+                    });
+                })
+            );
+        await processAllInvitations();
+        this.setState({invitations: []});
+        notify.show('Invitations have been accepted successfully!','success');
+    };
+
     render() {
         const {handleSignOut, userSession} = this.props;
-        const {person, currentTab, uploading} = this.state;
+        const {person, currentTab, uploading, invitations} = this.state;
         return (
             !userSession.isSignInPending() ?
                 <div className="panel-welcome" id="section-2">
+                    <UncontrolledDropdown direction={'down'}>
+                        <DropdownToggle disabled={invitations.length === 0} className='notifyWrapper'>
+                            <Notifications
+                                className={`notifications ${invitations.length > 0 && 'pulseBtn'}`}/>
+                        </DropdownToggle>
+                        <DropdownMenu className='notifyDD'>
+                            <DropdownItem className='notifyItem'>
+                                <button onClick={this.acceptAllInvitation} className='accept'>Accept all</button>
+                            </DropdownItem>
+                            {invitations.map(inv => {
+                                return (
+                                    <DropdownItem key={inv.id} className='notifyItem'>
+                                        You have got a new invitation <button
+                                        onClick={this.acceptInvitation.bind(null, inv.id, inv._id)}
+                                        className='accept'>Accept</button>
+                                    </DropdownItem>);
+                            })}
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                     <div className="avatar-section">
                         <img src={person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage}
                              className="img-rounded avatar" id="avatar-image"/>
@@ -114,12 +168,18 @@ export default class Profile extends Component {
                             >
                                 My files
                             </button>
+                            <button
+                                className={`$btn btn-primary ${currentTab === '2' ? 'btn-tab' : ''}`}
+                                onClick={this.onTabClicked.bind(this, '2')}
+                            >
+                                Shared with me
+                            </button>
                         </div>
                         {currentTab === '0' ?
                             <div className='upload-part'>
                                 <DragDropFile className='dragDrop' handleFile={this.handleDrop}/>
                                 {uploading ? <div>
-                                <ClipLoader
+                                    <ClipLoader
                                         sizeUnit={"px"}
                                         size={40}
                                         color={'white'}
@@ -133,7 +193,7 @@ export default class Profile extends Component {
                                     className='upload-btn'
                                     onChange={this.handleChange}
                                 />
-                            </div> : <MyFiles/>}
+                            </div> : currentTab === '1' ? <MyFiles/> : <SharedFiles/>}
                     </div>
                     <p className="lead">
                         <button
@@ -150,6 +210,18 @@ export default class Profile extends Component {
 
     componentWillMount() {
         const {userSession} = this.props;
+        InvitationScheme.fetchList({
+            to: userSession.loadUserData().username,
+            isPending: true,
+        }).then(invitationsRes => {
+            const mappedInvitations = invitationsRes.map(cr => (
+                Object.assign({}, cr.attrs, {
+                    id: cr.attrs.invitationId,
+                    schemeId: cr._id,
+                })
+            ));
+            this.setState({invitations: mappedInvitations});
+        });
         this.setState({
             person: new Person(userSession.loadUserData().profile),
         });

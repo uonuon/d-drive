@@ -119,9 +119,9 @@ export default class Profile extends Component {
                             <div className='upload-part'>
                                 <DragDropFile className='dragDrop' handleFile={this.handleDrop}/>
                                 {uploading ? <div>
-                                    <ClipLoader
+                                <ClipLoader
                                         sizeUnit={"px"}
-                                        size={20}
+                                        size={40}
                                         color={'white'}
                                         loading={true}
                                     />

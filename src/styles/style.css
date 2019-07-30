@@ -55,5 +55,10 @@ position: absolute;}
 .my-files{
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin: 20px 0;
+}
+#signin-button {
+    font-size: 2rem;
 }
